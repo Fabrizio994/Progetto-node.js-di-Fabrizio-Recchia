@@ -36,11 +36,38 @@ export const AddOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const allOrders = await Order.find();
+    const { page = 1, limit = 10, productId, startDate, endDate } = req.query;
 
-    res.status(200).json(allOrders);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+    const query = {};
+    if (productId) {
+      query["products.product"] = productId;
+    }
+    if (startDate && endDate) {
+      query.orderDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    const orders = await Order.find(query)
+      .populate("user", "name")
+      .populate({
+        path: "products.product",
+        select: "name",
+      })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+
+    const count = await Order.countDocuments(query);
+
+    res.json({
+      orders,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -53,21 +80,6 @@ export const CallOrderById = async (req, res) => {
     const order = await Order.findById(_id);
 
     res.status(200).json(order);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
-
-export const DeleteOrder = async (req, res) => {
-  const { id: _id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(_id))
-    return res.status(404).send("No order with that id");
-
-  try {
-    await Order.findByIdAndDelete(_id);
-
-    res.status(200).json({ message: "Order deleted successfully" });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -109,38 +121,17 @@ export const UpdateOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-//http://localhost:3000/orders/filter/date?startDate=2024-01-01&endDate=2024-12-31
-export const getOrdersByDate = async (req, res) => {
-  const { startDate, endDate } = req.query;
+
+export const DeleteOrder = async (req, res) => {
+  const { id: _id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(_id))
+    return res.status(404).send("No order with that id");
 
   try {
-    const orders = await Order.find({
-      orderDate: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      },
-    })
-      .populate("user", "name")
-      .populate("products.product", "name");
+    await Order.findByIdAndDelete(_id);
 
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
-//http://localhost:3000/orders/filter/product?productName=prodact1
-export const getOrdersByProduct = async (req, res) => {
-  const { productName } = req.query;
-
-  try {
-    const product = await Product.findOne({ name: productName });
-    if (!product) return res.status(404).send("Product not found");
-
-    const orders = await Order.find({ "products.product": product._id })
-      .populate("user", "name")
-      .populate("products.product", "name");
-
-    res.status(200).json(orders);
+    res.status(200).json({ message: "Order deleted successfully" });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }

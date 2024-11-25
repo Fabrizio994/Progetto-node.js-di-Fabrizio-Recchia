@@ -261,7 +261,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "  {\r\n    \"userName\": \"franco\",\r\n    \"productName\": \"prodact1\",\r\n    \"quantity\": 200\r\n  }",
+					"raw": "  {\r\n    \"name\": \"franco\",\r\n    \"productName\": \"prodact2\",\r\n    \"quantity\": 202\r\n  }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -290,22 +290,27 @@
 				"method": "GET",
 				"header": [],
 				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
+					"mode": "formdata",
+					"formdata": []
 				},
 				"url": {
-					"raw": "localhost:3000/orders",
+					"raw": "localhost:3000/orders?startDate=2024-11-01&endDate=2024-11-31",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
 						"orders"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "2024-11-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2024-11-31"
+						}
 					]
 				}
 			},
@@ -422,25 +427,22 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/orders/filter/date?startDate=2024-01-02&endDate=2024-12-31",
-					"protocol": "http",
+					"raw": "localhost:3000/orders?startDate=2024-10-01&endDate=2024-11-31",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"orders",
-						"filter",
-						"date"
+						"orders"
 					],
 					"query": [
 						{
 							"key": "startDate",
-							"value": "2024-01-02"
+							"value": "2024-10-01"
 						},
 						{
 							"key": "endDate",
-							"value": "2024-12-31"
+							"value": "2024-11-31"
 						}
 					]
 				}
